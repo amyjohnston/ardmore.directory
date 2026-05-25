@@ -1,12 +1,13 @@
 import { defineConfig } from 'astro/config';
 import tailwindcss from '@tailwindcss/vite';
+import sitemap from '@astrojs/sitemap';
+import cloudflare from '@astrojs/cloudflare';
 
-import sitemap from "@astrojs/sitemap";
 export default defineConfig({
   vite: {
     plugins: [tailwindcss()],
   },
-  // Add your domain here
-   site: 'https://ardmore.directory',
-  integrations: [ sitemap()]
+  site: 'https://ardmore.directory',
+  adapter: cloudflare(),
+  integrations: [sitemap()],
 });

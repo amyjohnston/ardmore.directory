@@ -10,9 +10,11 @@
     "astro": "astro"
   },
   "devDependencies": {
+    "@astrojs/cloudflare": "^13.5.4",
     "@astrojs/sitemap": "^3.7.1",
     "@tailwindcss/vite": "^4.2.1",
     "astro": "^6.0.5",
-    "tailwindcss": "^4.2.1"
+    "tailwindcss": "^4.2.1",
+    "wrangler": "^4.94.0"
   }
 }

@@ -1,0 +1,8 @@
+{
+  // Wrangler config for ardmore.directory
+  "name": "ardmore-directory",
+  "compatibility_date": "2025-01-01",
+  "assets": {
+    "directory": "./dist/client"
+  }
+}
