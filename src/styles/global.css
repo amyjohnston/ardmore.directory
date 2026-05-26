@@ -14,6 +14,12 @@
   --color-base-900: oklch(26.54% 0.006 134.86);
   --color-base-950: oklch(20.6% 0.005 145.31);
 
+  /* Brand colors */
+  --color-brand-gold: rgb(255, 185, 0);
+  --color-brand-orange: rgb(255, 131, 0);
+  --color-brand-teal: rgb(57, 113, 102);
+  --color-brand-chartreuse: rgb(194, 196, 0);
+
   /* ORange  */
   --color-orange-50: oklch(96.67% 0.016 22.18);
   --color-orange-100: oklch(93.48% 0.031 25.08);
@@ -31,19 +37,5 @@
 }
 /* CSS */
 :root {
-  /* Typography */
-  font-feature-settings: "liga" 1, "calt" 1,
-    /* Contextual Alternates */ "dlig" 1, /* Discretionary Ligatures */ "ss07" 1,
-    /* fSquare punctuation */ "ss08" 1, /* Square quotes */ "zero" 1,
-    /* Slashed zero */ "tnum" 1, /* Tabular numbers */ "cv03" 1,
-    /* Open six */ "cv04" 1, /* Open nine */ "cv01" 1,
-    /* Alternate one */ "cv09", /* Flat-top three */ "cv02" 1; /* Open 4 */
-  font-family: Inter, sans-serif;
-  font-variant-numeric: tabular-nums;
-}
-@supports (font-variation-settings: normal) {
-  /* Use variable font if supported */
-  :root {
-    font-family: InterVariable, sans-serif;
-  }
+  font-family: "Open Sans", Arial, sans-serif;
 }
