@@ -5,6 +5,15 @@ import Footer from "@/components/global/Footer.astro";
 
 <html lang="en">
   <head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-86WJKMHM4G"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-86WJKMHM4G');
+    </script>
     <BaseHead />
   </head>
   <body class="bg-white max-w-6xl mx-auto px-8 lg:px-12 flex flex-col">
