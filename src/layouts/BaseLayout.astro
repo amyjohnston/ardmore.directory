@@ -10,8 +10,18 @@ import Footer from "@/components/global/Footer.astro";
     <script is:inline>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
 
+      // Set default consent state before any tracking fires.
+      // CookieYes will update these when the user makes a choice.
+      gtag('consent', 'default', {
+        ad_storage: 'denied',
+        ad_user_data: 'denied',
+        ad_personalization: 'denied',
+        analytics_storage: 'denied',
+        wait_for_update: 500,
+      });
+
+      gtag('js', new Date());
       gtag('config', 'G-86WJKMHM4G');
     </script>
     <BaseHead />
