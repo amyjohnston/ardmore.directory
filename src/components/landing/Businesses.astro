@@ -9,16 +9,16 @@ const accentColors = [
 ];
 ---
 
-<section class="py-12">
-  <div class="flex gap-8 items-start">
+<section class="py-8 lg:py-12">
+  <div class="flex flex-col gap-6 lg:flex-row lg:gap-8 lg:items-start">
 
-    <!-- Sidebar filter -->
-    <aside class="w-52 shrink-0 sticky top-8" aria-labelledby="filter-heading">
+    <!-- Filter: horizontal scroll pills on mobile, sticky sidebar on desktop -->
+    <aside aria-labelledby="filter-heading">
       <p id="filter-heading" class="text-xs font-semibold uppercase tracking-widest text-base-500 mb-3">Filter by type</p>
-      <ul class="flex flex-col gap-1">
-        <li>
+      <ul class="flex flex-row gap-2 overflow-x-auto pb-1 lg:flex-col lg:gap-1 lg:overflow-visible lg:pb-0 lg:w-52 lg:sticky lg:top-8">
+        <li class="shrink-0">
           <button
-            class="filter-btn w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors bg-base-900 text-white"
+            class="filter-btn whitespace-nowrap lg:w-full lg:text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors bg-base-900 text-white"
             data-filter="all"
             aria-pressed="true"
           >
@@ -26,9 +26,9 @@ const accentColors = [
           </button>
         </li>
         {categories.map((cat) => (
-          <li>
+          <li class="shrink-0">
             <button
-              class="filter-btn w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors text-base-700 hover:bg-base-100"
+              class="filter-btn whitespace-nowrap lg:w-full lg:text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors text-base-700 hover:bg-base-100"
               data-filter={cat}
               aria-pressed="false"
             >
@@ -40,7 +40,7 @@ const accentColors = [
     </aside>
 
     <!-- Business cards grid -->
-    <div id="biz-grid" class="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3 flex-1">
+    <div id="biz-grid" class="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3 flex-1">
       {
         businesses.map((biz, i) => (
           <div
