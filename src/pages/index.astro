@@ -7,8 +7,7 @@ import Businesses from '../components/landing/Businesses.astro';
 import { drizzle } from 'drizzle-orm/d1';
 import { businesses as businessesTable } from '../db/schema';
 import type { Business } from '../db/schema';
-
-const env = (Astro.locals as any).runtime?.env ?? {};
+import { env } from '../lib/env';
 
 let businesses: Business[] = [];
 

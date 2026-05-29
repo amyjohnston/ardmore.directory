@@ -8,8 +8,7 @@ import { eq } from 'drizzle-orm';
 import { businesses } from '../db/schema';
 import { categories } from '../data/businesses.js';
 import type { Business } from '../db/schema';
-
-const env = (Astro.locals as any).runtime?.env ?? {};
+import { env } from '../lib/env';
 
 // Require authentication
 if (!env.DB) return Astro.redirect('/login');

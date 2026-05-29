@@ -1,11 +1,12 @@
 import type { APIRoute } from 'astro';
+import { env } from '../../lib/env';
 
 export const prerender = false;
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 const MAX_BYTES = 5 * 1024 * 1024; // 5 MB
 
-export const POST: APIRoute = async ({ request, locals }) => {
+export const POST: APIRoute = async ({ request }) => {
   const json = (body: object, status = 200) =>
     new Response(JSON.stringify(body), {
       status,
@@ -26,8 +27,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
       return json({ error: 'Image must be 5 MB or smaller.' }, 400);
     }
 
-    const env = (locals as any).runtime?.env;
-    const bucket = env?.IMAGES_BUCKET;
+    const bucket = env.IMAGES_BUCKET;
     if (!bucket) {
       return json({ error: 'Image storage is not configured. Please try again later.' }, 500);
     }
@@ -39,7 +39,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
       httpMetadata: { contentType: file.type },
     });
 
-    const baseUrl = (env?.R2_PUBLIC_URL as string | undefined)?.replace(/\/$/, '');
+    const baseUrl = env.R2_PUBLIC_URL?.replace(/\/$/, '');
     const url = baseUrl ? `${baseUrl}/${key}` : key;
 
     return json({ url });

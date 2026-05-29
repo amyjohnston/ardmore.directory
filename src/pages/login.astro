@@ -3,13 +3,13 @@ export const prerender = false;
 
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { createAuth } from '../lib/auth';
+import { env } from '../lib/env';
 
 // Redirect already-logged-in users
-const env = (Astro.locals as any).runtime?.env ?? {};
 if (env.DB) {
   const auth = createAuth(env.DB, env.BETTER_AUTH_SECRET ?? 'dev-secret-change-in-production');
   const session = await auth.api.getSession({ headers: Astro.request.headers });
-  if (session) return Astro.redirect('/');
+  if (session) return Astro.redirect('/dashboard');
 }
 ---
 

@@ -1,9 +1,9 @@
-/// <reference types="@cloudflare/workers-types" />
 import type { APIRoute } from 'astro';
 import { drizzle } from 'drizzle-orm/d1';
 import { eq } from 'drizzle-orm';
 import { createAuth } from '../../lib/auth';
 import { businesses } from '../../db/schema';
+import { env } from '../../lib/env';
 
 export const prerender = false;
 
@@ -15,8 +15,7 @@ function json(body: object, status = 200) {
 }
 
 // DELETE — delete the account, listing, and R2 image
-export const DELETE: APIRoute = async ({ request, locals }) => {
-  const env = (locals as any).runtime?.env ?? {};
+export const DELETE: APIRoute = async ({ request }) => {
   if (!env.DB) return json({ error: 'Not configured.' }, 500);
 
   const auth = createAuth(env.DB, env.BETTER_AUTH_SECRET ?? 'dev-secret', env.RESEND_API_KEY);

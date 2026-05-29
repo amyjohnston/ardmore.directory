@@ -1,9 +1,9 @@
-/// <reference types="@cloudflare/workers-types" />
 import type { APIRoute } from 'astro';
 import { drizzle } from 'drizzle-orm/d1';
 import { eq } from 'drizzle-orm';
 import { createAuth } from '../../lib/auth';
 import { businesses } from '../../db/schema';
+import { env } from '../../lib/env';
 
 export const prerender = false;
 
@@ -14,19 +14,17 @@ function json(body: object, status = 200) {
   });
 }
 
-async function getSession(request: Request, locals: App.Locals) {
-  const env = (locals as any).runtime?.env ?? {};
+async function getSession(request: Request) {
   if (!env.DB) return null;
   const auth = createAuth(env.DB, env.BETTER_AUTH_SECRET ?? 'dev-secret', env.RESEND_API_KEY);
   return auth.api.getSession({ headers: request.headers });
 }
 
 // GET — fetch the current user's listing
-export const GET: APIRoute = async ({ request, locals }) => {
-  const session = await getSession(request, locals);
+export const GET: APIRoute = async ({ request }) => {
+  const session = await getSession(request);
   if (!session?.user) return json({ error: 'Unauthorised' }, 401);
 
-  const env = (locals as any).runtime?.env ?? {};
   const db = drizzle(env.DB);
   const [listing] = await db
     .select()
@@ -38,11 +36,10 @@ export const GET: APIRoute = async ({ request, locals }) => {
 };
 
 // POST — create a new listing for the current user
-export const POST: APIRoute = async ({ request, locals }) => {
-  const session = await getSession(request, locals);
+export const POST: APIRoute = async ({ request }) => {
+  const session = await getSession(request);
   if (!session?.user) return json({ error: 'Unauthorised' }, 401);
 
-  const env = (locals as any).runtime?.env ?? {};
   const db = drizzle(env.DB);
 
   // One listing per user
@@ -63,7 +60,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
   await db.insert(businesses).values({
     id,
-    userId: session.user.id,
+    userId:   session.user.id,
     name:     body.name.trim(),
     category: body.category.trim(),
     phone:    body.phone?.trim()    || null,
@@ -81,11 +78,10 @@ export const POST: APIRoute = async ({ request, locals }) => {
 };
 
 // PATCH — update the current user's listing
-export const PATCH: APIRoute = async ({ request, locals }) => {
-  const session = await getSession(request, locals);
+export const PATCH: APIRoute = async ({ request }) => {
+  const session = await getSession(request);
   if (!session?.user) return json({ error: 'Unauthorised' }, 401);
 
-  const env = (locals as any).runtime?.env ?? {};
   const db = drizzle(env.DB);
 
   const [existing] = await db
@@ -117,11 +113,10 @@ export const PATCH: APIRoute = async ({ request, locals }) => {
 };
 
 // DELETE — remove the current user's listing
-export const DELETE: APIRoute = async ({ request, locals }) => {
-  const session = await getSession(request, locals);
+export const DELETE: APIRoute = async ({ request }) => {
+  const session = await getSession(request);
   if (!session?.user) return json({ error: 'Unauthorised' }, 401);
 
-  const env = (locals as any).runtime?.env ?? {};
   const db = drizzle(env.DB);
 
   const [existing] = await db
