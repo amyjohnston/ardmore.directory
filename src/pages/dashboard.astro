@@ -1,0 +1,521 @@
+---
+export const prerender = false;
+
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { createAuth } from '../lib/auth';
+import { drizzle } from 'drizzle-orm/d1';
+import { eq } from 'drizzle-orm';
+import { businesses } from '../db/schema';
+import { categories } from '../data/businesses.js';
+import type { Business } from '../db/schema';
+
+const env = (Astro.locals as any).runtime?.env ?? {};
+
+// Require authentication
+if (!env.DB) return Astro.redirect('/login');
+const auth = createAuth(env.DB, env.BETTER_AUTH_SECRET ?? 'dev-secret', env.RESEND_API_KEY);
+const session = await auth.api.getSession({ headers: Astro.request.headers });
+if (!session?.user) return Astro.redirect('/login');
+
+const user = session.user;
+const db = drizzle(env.DB);
+
+// Load the user's existing listing (if any)
+const [listing] = await db
+  .select()
+  .from(businesses)
+  .where(eq(businesses.userId, user.id))
+  .limit(1)
+  .catch(() => [undefined]);
+
+const biz: Business | undefined = listing;
+---
+
+<BaseLayout
+  title="My listing | ardmore.directory"
+  description="Manage your business listing on ardmore.directory."
+>
+  <div class="max-w-2xl mx-auto py-12">
+
+    <div class="mb-8">
+      <h1 class="text-2xl font-medium text-base-900">Hi, {user.name} 👋</h1>
+      <p class="text-sm text-base-500 mt-1">Manage your listing and account settings below.</p>
+    </div>
+
+    <!-- ── Status messages ──────────────────────────────────────── -->
+    <div id="dashboard-status" class="hidden rounded-xl px-4 py-3 text-sm mb-6" role="alert"></div>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         SECTION 1: Business listing
+    ════════════════════════════════════════════════════════════════ -->
+    <section class="mb-12">
+      <h2 class="text-xs font-semibold uppercase tracking-widest text-base-500 mb-5">Your listing</h2>
+
+      <form id="listing-form" novalidate class="flex flex-col gap-5">
+
+        <div class="flex flex-col gap-1.5">
+          <label for="name" class="text-sm font-medium text-base-800">
+            Business name <span class="text-red-500">*</span>
+          </label>
+          <input type="text" id="name" name="name" required autocomplete="organization"
+            value={biz?.name ?? ''}
+            placeholder="e.g. Ardmore Coffee House"
+            class="rounded-lg border border-base-300 px-3 py-2 text-sm text-base-900 placeholder:text-base-400 focus:outline-none focus:ring-2 focus:ring-base-900" />
+        </div>
+
+        <div class="flex flex-col gap-1.5">
+          <label for="category" class="text-sm font-medium text-base-800">
+            Category <span class="text-red-500">*</span>
+          </label>
+          <select id="category" name="category" required
+            class="rounded-lg border border-base-300 px-3 py-2 text-sm text-base-900 bg-white focus:outline-none focus:ring-2 focus:ring-base-900">
+            <option value="" disabled selected={!biz?.category}>Select a category…</option>
+            {categories.map((cat) => (
+              <option value={cat} selected={biz?.category === cat}>{cat}</option>
+            ))}
+          </select>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          <div class="flex flex-col gap-1.5">
+            <label for="phone" class="text-sm font-medium text-base-800">Phone number</label>
+            <input type="tel" id="phone" name="phone"
+              value={biz?.phone ?? ''}
+              placeholder="(580) 555-0100"
+              class="rounded-lg border border-base-300 px-3 py-2 text-sm text-base-900 placeholder:text-base-400 focus:outline-none focus:ring-2 focus:ring-base-900" />
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label for="biz-email" class="text-sm font-medium text-base-800">Business email</label>
+            <input type="email" id="biz-email" name="email"
+              value={biz?.email ?? ''}
+              placeholder="hello@yourbusiness.com"
+              class="rounded-lg border border-base-300 px-3 py-2 text-sm text-base-900 placeholder:text-base-400 focus:outline-none focus:ring-2 focus:ring-base-900" />
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-1.5">
+          <label for="address" class="text-sm font-medium text-base-800">Street address</label>
+          <input type="text" id="address" name="address"
+            value={biz?.address ?? ''}
+            placeholder="123 W Main St, Ardmore, OK 73401"
+            class="rounded-lg border border-base-300 px-3 py-2 text-sm text-base-900 placeholder:text-base-400 focus:outline-none focus:ring-2 focus:ring-base-900" />
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          <div class="flex flex-col gap-1.5">
+            <label for="website" class="text-sm font-medium text-base-800">Website</label>
+            <input type="url" id="website" name="website"
+              value={biz?.website ?? ''}
+              placeholder="https://yourbusiness.com"
+              class="rounded-lg border border-base-300 px-3 py-2 text-sm text-base-900 placeholder:text-base-400 focus:outline-none focus:ring-2 focus:ring-base-900" />
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label for="facebook" class="text-sm font-medium text-base-800">Facebook page URL</label>
+            <input type="url" id="facebook" name="facebook"
+              value={biz?.facebook ?? ''}
+              placeholder="https://facebook.com/yourbusiness"
+              class="rounded-lg border border-base-300 px-3 py-2 text-sm text-base-900 placeholder:text-base-400 focus:outline-none focus:ring-2 focus:ring-base-900" />
+          </div>
+        </div>
+
+        <!-- Image upload -->
+        <div class="flex flex-col gap-3">
+          <div class="flex flex-col gap-1">
+            <span class="text-sm font-medium text-base-800">Logo or photo</span>
+            <p class="text-xs text-base-500">JPG or PNG, max 5 MB. You'll be able to crop before saving.</p>
+          </div>
+
+          {biz?.imageUrl && (
+            <div id="current-image" class="flex items-center gap-3">
+              <img src={biz.imageUrl} alt="Current logo" class="w-28 aspect-video object-cover rounded-lg border border-base-200" />
+              <div class="flex flex-col gap-1.5">
+                <p class="text-xs text-base-500">Current image</p>
+                <button type="button" id="remove-current-image"
+                  class="text-xs text-red-600 hover:text-red-700 font-medium text-left">Remove image</button>
+              </div>
+            </div>
+          )}
+
+          <div id="file-picker-area">
+            <label for="logo-input"
+              class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-base-300 text-sm font-medium text-base-700 hover:bg-base-50 transition-colors cursor-pointer">
+              <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
+              </svg>
+              {biz?.imageUrl ? 'Upload new image' : 'Choose image'}
+            </label>
+            <input type="file" id="logo-input" accept="image/jpeg,image/png" class="sr-only" />
+          </div>
+
+          <div id="crop-area" class="hidden flex flex-col gap-3">
+            <div class="overflow-hidden rounded-xl border border-base-200 bg-base-50" style="max-height: 320px;">
+              <img id="crop-image" class="block max-w-full" alt="" />
+            </div>
+            <div class="flex gap-2 flex-wrap">
+              <button type="button" id="use-image-btn"
+                class="px-4 py-2 bg-base-900 text-white text-sm font-medium rounded-lg hover:opacity-90 transition-opacity">
+                Use this crop
+              </button>
+              <button type="button" id="change-image-btn"
+                class="px-4 py-2 bg-base-100 text-base-700 text-sm font-medium rounded-lg hover:bg-base-200 transition-colors">
+                Choose a different image
+              </button>
+            </div>
+          </div>
+
+          <div id="image-preview" class="hidden flex items-center gap-3">
+            <img id="preview-img" alt="New image preview" class="w-28 aspect-video object-cover rounded-lg border border-base-200" />
+            <div class="flex flex-col gap-1.5">
+              <p class="text-xs text-base-500">New image selected</p>
+              <div class="flex gap-2">
+                <button type="button" id="edit-crop-btn"
+                  class="text-xs font-medium text-base-700 hover:text-base-900">Edit crop</button>
+                <span class="text-xs text-base-300">·</span>
+                <button type="button" id="remove-image-btn"
+                  class="text-xs font-medium text-red-600 hover:text-red-700">Remove</button>
+              </div>
+            </div>
+          </div>
+
+          <p id="image-error" class="hidden text-xs text-red-500" role="alert"></p>
+        </div>
+
+        <div class="flex items-center gap-3 pt-2">
+          <button type="submit" id="listing-save-btn"
+            class="px-6 py-2.5 bg-brand-orange text-white text-sm font-medium rounded-full hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed">
+            {biz ? 'Save changes' : 'Create listing'}
+          </button>
+          {biz && (
+            <button type="button" id="listing-delete-btn"
+              class="px-4 py-2.5 text-sm font-medium text-red-600 hover:text-red-700 transition-colors">
+              Delete listing
+            </button>
+          )}
+        </div>
+
+      </form>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         SECTION 2: Account settings
+    ════════════════════════════════════════════════════════════════ -->
+    <section class="flex flex-col gap-8 border-t border-base-100 pt-10">
+      <h2 class="text-xs font-semibold uppercase tracking-widest text-base-500">Account settings</h2>
+
+      <!-- Change name -->
+      <form id="name-form" novalidate class="flex flex-col gap-4">
+        <h3 class="text-sm font-semibold text-base-800">Your name</h3>
+        <div class="flex gap-3">
+          <input type="text" id="new-name" required autocomplete="name"
+            value={user.name}
+            class="flex-1 rounded-lg border border-base-300 px-3 py-2 text-sm text-base-900 focus:outline-none focus:ring-2 focus:ring-base-900" />
+          <button type="submit"
+            class="px-4 py-2 bg-base-900 text-white text-sm font-medium rounded-lg hover:opacity-90 transition-opacity">
+            Update
+          </button>
+        </div>
+        <div id="name-status" class="hidden text-xs" role="status"></div>
+      </form>
+
+      <!-- Change email -->
+      <form id="email-form" novalidate class="flex flex-col gap-4">
+        <div>
+          <h3 class="text-sm font-semibold text-base-800">Email address</h3>
+          <p class="text-xs text-base-500 mt-0.5">Current: <strong>{user.email}</strong></p>
+        </div>
+        <div class="flex gap-3">
+          <input type="email" id="new-email" required autocomplete="email"
+            placeholder="new@example.com"
+            class="flex-1 rounded-lg border border-base-300 px-3 py-2 text-sm text-base-900 placeholder:text-base-400 focus:outline-none focus:ring-2 focus:ring-base-900" />
+          <button type="submit"
+            class="px-4 py-2 bg-base-900 text-white text-sm font-medium rounded-lg hover:opacity-90 transition-opacity">
+            Update
+          </button>
+        </div>
+        <div id="email-status" class="hidden text-xs" role="status"></div>
+      </form>
+
+      <!-- Change password -->
+      <form id="password-form" novalidate class="flex flex-col gap-4">
+        <h3 class="text-sm font-semibold text-base-800">Change password</h3>
+        <div class="flex flex-col gap-3">
+          <input type="password" id="current-password" required autocomplete="current-password"
+            placeholder="Current password"
+            class="rounded-lg border border-base-300 px-3 py-2 text-sm text-base-900 placeholder:text-base-400 focus:outline-none focus:ring-2 focus:ring-base-900" />
+          <input type="password" id="new-password" required autocomplete="new-password"
+            placeholder="New password (min 8 characters)"
+            class="rounded-lg border border-base-300 px-3 py-2 text-sm text-base-900 placeholder:text-base-400 focus:outline-none focus:ring-2 focus:ring-base-900" />
+          <button type="submit"
+            class="self-start px-4 py-2 bg-base-900 text-white text-sm font-medium rounded-lg hover:opacity-90 transition-opacity">
+            Change password
+          </button>
+        </div>
+        <div id="password-status" class="hidden text-xs" role="status"></div>
+      </form>
+
+      <!-- Danger zone: delete account -->
+      <div class="border border-red-100 rounded-xl p-5 flex flex-col gap-3">
+        <h3 class="text-sm font-semibold text-red-700">Delete account</h3>
+        <p class="text-xs text-base-500">
+          Permanently deletes your account and your listing. This cannot be undone.
+        </p>
+        <button type="button" id="delete-account-btn"
+          class="self-start px-4 py-2 bg-red-50 text-red-700 text-sm font-medium rounded-lg border border-red-200 hover:bg-red-100 transition-colors">
+          Delete my account
+        </button>
+      </div>
+
+    </section>
+  </div>
+</BaseLayout>
+
+<link slot="head" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css" />
+
+<script define:vars={{ hasBiz: !!biz, existingImageUrl: biz?.imageUrl ?? null }}>
+  // ── We use define:vars to pass server values into the client script ──
+  window.__dashboard__ = { hasBiz, existingImageUrl };
+</script>
+
+<script>
+  import Cropper from 'cropperjs';
+  import { authClient } from '../lib/auth-client';
+
+  // ── State ──────────────────────────────────────────────────────
+  const { hasBiz, existingImageUrl } = (window as any).__dashboard__;
+  let cropper: Cropper | null = null;
+  let croppedBlob: Blob | null = null;
+  let removeExistingImage = false;
+
+  // ── Helpers ────────────────────────────────────────────────────
+  const $ = (id: string) => document.getElementById(id)!;
+  function show(el: HTMLElement) { el.classList.remove('hidden'); }
+  function hide(el: HTMLElement) { el.classList.add('hidden'); }
+
+  function showStatus(msg: string, type: 'success' | 'error') {
+    const el = $('dashboard-status');
+    el.textContent = msg;
+    el.className = [
+      'rounded-xl px-4 py-3 text-sm mb-6',
+      type === 'success' ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200',
+    ].join(' ');
+    show(el);
+    el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  function showFieldStatus(id: string, msg: string, ok: boolean) {
+    const el = $(id);
+    el.textContent = msg;
+    el.className = `text-xs ${ok ? 'text-green-700' : 'text-red-600'}`;
+    show(el);
+  }
+
+  // ── Image crop (same logic as add-your-business) ───────────────
+  const logoInput     = $('logo-input')      as HTMLInputElement;
+  const filePickArea  = $('file-picker-area');
+  const cropArea      = $('crop-area');
+  const cropImage     = $('crop-image')      as HTMLImageElement;
+  const useImageBtn   = $('use-image-btn')   as HTMLButtonElement;
+  const changeImgBtn  = $('change-image-btn') as HTMLButtonElement;
+  const imagePreview  = $('image-preview');
+  const previewImg    = $('preview-img')     as HTMLImageElement;
+  const editCropBtn   = $('edit-crop-btn')   as HTMLButtonElement;
+  const removeNewBtn  = $('remove-image-btn') as HTMLButtonElement;
+  const imageError    = $('image-error');
+  const currentImgEl  = document.getElementById('current-image');
+  const removeCurrBtn = document.getElementById('remove-current-image') as HTMLButtonElement | null;
+
+  function destroyCropper() { cropper?.destroy(); cropper = null; }
+
+  function resetToFilePicker() {
+    destroyCropper();
+    croppedBlob = null;
+    logoInput.value = '';
+    hide(cropArea);
+    hide(imagePreview);
+    show(filePickArea);
+    imageError.classList.add('hidden');
+  }
+
+  logoInput.addEventListener('change', () => {
+    const file = logoInput.files?.[0];
+    if (!file) return;
+    if (!['image/jpeg', 'image/png'].includes(file.type)) {
+      imageError.textContent = 'Please choose a JPG or PNG image.';
+      show(imageError);
+      logoInput.value = ''; return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      imageError.textContent = 'The image must be 5 MB or smaller.';
+      show(imageError);
+      logoInput.value = ''; return;
+    }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      destroyCropper();
+      cropImage.src = e.target!.result as string;
+      hide(filePickArea);
+      hide(imagePreview);
+      show(cropArea);
+      cropper = new Cropper(cropImage, {
+        aspectRatio: 16 / 9,
+        viewMode: 1,
+        autoCropArea: 0.9,
+        movable: true,
+        zoomable: true,
+        scalable: false,
+        rotatable: false,
+        guides: false,
+        center: true,
+        highlight: false,
+        ready() {},
+      });
+    };
+    reader.readAsDataURL(file);
+  });
+
+  useImageBtn.addEventListener('click', () => {
+    if (!cropper) return;
+    cropper.getCroppedCanvas({ width: 1200, height: 675 }).toBlob((blob: Blob | null) => {
+      if (!blob) return;
+      croppedBlob = blob;
+      previewImg.src = URL.createObjectURL(blob);
+      hide(cropArea);
+      destroyCropper();
+      show(imagePreview);
+      imageError.classList.add('hidden');
+    }, 'image/jpeg', 0.9);
+  });
+
+  changeImgBtn.addEventListener('click', resetToFilePicker);
+  editCropBtn.addEventListener('click', () => {
+    croppedBlob = null;
+    hide(imagePreview);
+    logoInput.files?.[0] ? logoInput.dispatchEvent(new Event('change')) : resetToFilePicker();
+  });
+  removeNewBtn.addEventListener('click', resetToFilePicker);
+
+  if (removeCurrBtn) {
+    removeCurrBtn.addEventListener('click', () => {
+      removeExistingImage = true;
+      currentImgEl?.remove();
+      removeCurrBtn.closest('#current-image')?.remove();
+    });
+  }
+
+  // ── Listing form ───────────────────────────────────────────────
+  const listingForm    = $('listing-form')    as HTMLFormElement;
+  const listingSaveBtn = $('listing-save-btn') as HTMLButtonElement;
+  const listingDelBtn  = document.getElementById('listing-delete-btn') as HTMLButtonElement | null;
+
+  listingForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    listingSaveBtn.disabled = true;
+    listingSaveBtn.textContent = 'Saving…';
+
+    try {
+      // Upload new image if one was cropped
+      let imageUrl: string | undefined;
+      if (croppedBlob) {
+        const fd = new FormData();
+        fd.append('image', croppedBlob, 'logo.jpg');
+        const r = await fetch('/api/upload-image', { method: 'POST', body: fd });
+        const j = await r.json() as { url?: string; error?: string };
+        if (!r.ok) throw new Error(j.error ?? 'Image upload failed.');
+        imageUrl = j.url;
+      }
+
+      const body: Record<string, string | null> = {
+        name:     (listingForm.querySelector('#name')     as HTMLInputElement).value.trim(),
+        category: (listingForm.querySelector('#category') as unknown as HTMLSelectElement).value,
+        phone:    (listingForm.querySelector('#phone')    as HTMLInputElement).value.trim()    || null,
+        email:    (listingForm.querySelector('#biz-email') as HTMLInputElement).value.trim()   || null,
+        address:  (listingForm.querySelector('#address')  as HTMLInputElement).value.trim()    || null,
+        website:  (listingForm.querySelector('#website')  as HTMLInputElement).value.trim()    || null,
+        facebook: (listingForm.querySelector('#facebook') as HTMLInputElement).value.trim()    || null,
+      };
+      if (imageUrl !== undefined) body.imageUrl = imageUrl;
+      else if (removeExistingImage) body.imageUrl = null;
+
+      const method = hasBiz ? 'PATCH' : 'POST';
+      const r = await fetch('/api/listing', {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const j = await r.json() as { listing?: unknown; error?: string };
+      if (!r.ok) throw new Error(j.error ?? 'Save failed.');
+
+      showStatus('Listing saved successfully!', 'success');
+      if (!hasBiz) {
+        // Reload so hasBiz is now true and delete button appears
+        setTimeout(() => window.location.reload(), 800);
+      }
+    } catch (err) {
+      showStatus(err instanceof Error ? err.message : 'Save failed. Please try again.', 'error');
+    } finally {
+      listingSaveBtn.disabled = false;
+      listingSaveBtn.textContent = hasBiz ? 'Save changes' : 'Create listing';
+    }
+  });
+
+  listingDelBtn?.addEventListener('click', async () => {
+    if (!confirm('Delete your listing? This cannot be undone.')) return;
+    const r = await fetch('/api/listing', { method: 'DELETE' });
+    if (r.ok) {
+      showStatus('Listing deleted.', 'success');
+      setTimeout(() => window.location.reload(), 800);
+    } else {
+      const j = await r.json() as { error?: string };
+      showStatus(j.error ?? 'Delete failed.', 'error');
+    }
+  });
+
+  // ── Name form ──────────────────────────────────────────────────
+  ($('name-form') as HTMLFormElement).addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const name = ($('new-name') as HTMLInputElement).value.trim();
+    if (!name) return;
+    const { error } = await authClient.updateUser({ name });
+    showFieldStatus('name-status', error ? (error.message ?? 'Update failed.') : 'Name updated!', !error);
+  });
+
+  // ── Email form ─────────────────────────────────────────────────
+  ($('email-form') as HTMLFormElement).addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const newEmail = ($('new-email') as HTMLInputElement).value.trim();
+    if (!newEmail) return;
+    const { error } = await authClient.changeEmail({ newEmail, callbackURL: '/dashboard' });
+    showFieldStatus('email-status',
+      error ? (error.message ?? 'Update failed.') : 'Verification sent to new address — click the link to confirm.',
+      !error);
+  });
+
+  // ── Password form ──────────────────────────────────────────────
+  ($('password-form') as HTMLFormElement).addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const currentPassword = ($('current-password') as HTMLInputElement).value;
+    const newPassword     = ($('new-password')     as HTMLInputElement).value;
+    if (newPassword.length < 8) {
+      showFieldStatus('password-status', 'New password must be at least 8 characters.', false);
+      return;
+    }
+    const { error } = await authClient.changePassword({ currentPassword, newPassword, revokeOtherSessions: true });
+    showFieldStatus('password-status',
+      error ? (error.message ?? 'Update failed.') : 'Password changed!',
+      !error);
+    if (!error) ($('password-form') as HTMLFormElement).reset();
+  });
+
+  // ── Delete account ─────────────────────────────────────────────
+  $('delete-account-btn').addEventListener('click', async () => {
+    if (!confirm('This will permanently delete your account and listing. Are you sure?')) return;
+    const r = await fetch('/api/account', { method: 'DELETE' });
+    if (r.ok) {
+      await authClient.signOut();
+      window.location.href = '/?deleted=1';
+    } else {
+      const j = await r.json() as { error?: string };
+      showStatus(j.error ?? 'Delete failed. Please try again.', 'error');
+    }
+  });
+</script>

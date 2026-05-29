@@ -1,8 +1,15 @@
 {
-  // Wrangler config for ardmore.directory
-  "name": "ardmore-directory",
-  "compatibility_date": "2025-01-01",
-  "assets": {
-    "directory": "./dist/client"
-  }
+	// Wrangler config for ardmore.directory
+	"name": "ardmore-directory",
+	"compatibility_date": "2025-01-01",
+	"assets": {
+		"directory": "./dist/client"
+	},
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "ardmore-directory",
+			"database_id": "40795c2f-96eb-4f6a-b6f9-6a4de3b98f8c"
+		}
+	]
 }

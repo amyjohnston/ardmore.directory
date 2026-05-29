@@ -22,6 +22,6 @@ database_id = "PASTE_YOUR_DATABASE_ID_HERE"  # from: npx wrangler d1 create ardm
 
 [vars]
 R2_PUBLIC_URL = ""
-# BETTER_AUTH_SECRET is a secret — set it via:
-#   npx wrangler secret put BETTER_AUTH_SECRET
-# Use a long random string (e.g. openssl rand -base64 32)
+# Secrets — set each with: npx wrangler secret put <NAME>
+# BETTER_AUTH_SECRET: long random string (openssl rand -base64 32)
+# RESEND_API_KEY:     from your Resend dashboard → API Keys

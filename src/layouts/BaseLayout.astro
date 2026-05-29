@@ -41,11 +41,52 @@ const {
     <BaseHead title={title} description={description} />
     <slot name="head" />
   </head>
-  <body class="bg-white max-w-6xl mx-auto px-8 lg:px-12 flex flex-col">
+  <body class="bg-white max-w-6xl mx-auto px-8 lg:px-12 flex flex-col min-h-screen">
     <a href="#biz-grid" class="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-base-900 focus:text-white focus:rounded-lg focus:text-sm focus:font-medium">
       Skip to listings
     </a>
+
+    <!-- Site nav -->
+    <nav class="flex items-center justify-between py-4 border-b border-base-100" aria-label="Site navigation">
+      <a href="/" class="text-sm font-semibold text-base-700 tracking-wide hover:text-base-900 transition-colors">
+        ardmore.directory
+      </a>
+      <div class="flex items-center gap-3 text-sm">
+        <!-- Logged-out state (shown by default, hidden by JS when session exists) -->
+        <div id="nav-loggedout" class="flex items-center gap-3">
+          <a href="/login" class="text-base-600 hover:text-base-900 transition-colors font-medium">Log in</a>
+          <a href="/register" class="px-3 py-1.5 bg-brand-orange text-white rounded-full font-medium hover:opacity-90 transition-opacity">Register</a>
+        </div>
+        <!-- Logged-in state (hidden by default, shown by JS when session exists) -->
+        <div id="nav-loggedin" class="hidden flex items-center gap-3">
+          <a href="/dashboard" class="text-base-600 hover:text-base-900 transition-colors font-medium">My listing</a>
+          <button id="nav-signout" class="px-3 py-1.5 bg-base-100 text-base-700 rounded-full font-medium hover:bg-base-200 transition-colors">Sign out</button>
+        </div>
+      </div>
+    </nav>
+
     <main class="grow"><slot /></main>
     <Footer />
   </body>
 </html>
+
+<script>
+  import { authClient } from '../lib/auth-client';
+
+  const loggedOut = document.getElementById('nav-loggedout')!;
+  const loggedIn  = document.getElementById('nav-loggedin')!;
+  const signOutBtn = document.getElementById('nav-signout')!;
+
+  // Check session and show the right nav state
+  authClient.getSession().then(({ data }) => {
+    if (data?.session) {
+      loggedOut.classList.add('hidden');
+      loggedIn.classList.remove('hidden');
+    }
+  });
+
+  signOutBtn.addEventListener('click', async () => {
+    await authClient.signOut();
+    window.location.href = '/';
+  });
+</script>

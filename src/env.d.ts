@@ -7,6 +7,7 @@ interface Env {
   IMAGES_BUCKET: R2Bucket;
   R2_PUBLIC_URL: string;
   BETTER_AUTH_SECRET: string;
+  RESEND_API_KEY: string;
 }
 
 declare namespace App {

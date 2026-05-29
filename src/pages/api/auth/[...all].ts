@@ -9,7 +9,7 @@ export const prerender = false;
 const handler: APIRoute = async ({ request, locals }) => {
   const env = (locals as any).runtime?.env ?? {};
   const secret = env.BETTER_AUTH_SECRET ?? 'dev-secret-change-in-production';
-  const auth = createAuth(env.DB, secret);
+  const auth = createAuth(env.DB, secret, env.RESEND_API_KEY);
   return auth.handler(request);
 };
 
