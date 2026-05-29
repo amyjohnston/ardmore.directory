@@ -12,9 +12,17 @@
   "devDependencies": {
     "@astrojs/cloudflare": "^13.5.4",
     "@astrojs/sitemap": "^3.7.1",
+    "@cloudflare/workers-types": "^4.20260529.1",
     "@tailwindcss/vite": "^4.2.1",
     "astro": "^6.0.5",
+    "cropperjs": "^1.6.2",
     "tailwindcss": "^4.2.1",
     "wrangler": "^4.94.0"
+  },
+  "dependencies": {
+    "@astrojs/check": "^0.9.9",
+    "better-auth": "^1.6.11",
+    "drizzle-orm": "^0.45.2",
+    "typescript": "^6.0.3"
   }
 }

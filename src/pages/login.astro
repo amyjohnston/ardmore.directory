@@ -1,0 +1,87 @@
+---
+export const prerender = false;
+
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { createAuth } from '../lib/auth';
+
+// Redirect already-logged-in users
+const env = (Astro.locals as any).runtime?.env ?? {};
+if (env.DB) {
+  const auth = createAuth(env.DB, env.BETTER_AUTH_SECRET ?? 'dev-secret-change-in-production');
+  const session = await auth.api.getSession({ headers: Astro.request.headers });
+  if (session) return Astro.redirect('/');
+}
+---
+
+<BaseLayout
+  title="Log in | ardmore.directory"
+  description="Log in to manage your business listing on ardmore.directory."
+>
+  <div class="max-w-sm mx-auto py-16 px-4">
+
+    <div class="mb-8 text-center">
+      <a href="/" class="text-sm text-base-500 hover:text-base-900 transition-colors">&larr; Back to directory</a>
+    </div>
+
+    <h1 class="text-2xl font-medium text-base-900 mb-1 text-center">Welcome back</h1>
+    <p class="text-sm text-base-500 text-center mb-8">Log in to manage your listing</p>
+
+    <form id="login-form" novalidate class="flex flex-col gap-4">
+      <div class="flex flex-col gap-1.5">
+        <label for="email" class="text-sm font-medium text-base-800">Email address</label>
+        <input type="email" id="email" name="email" required autocomplete="email"
+          placeholder="you@example.com"
+          class="rounded-lg border border-base-300 px-3 py-2 text-sm text-base-900 placeholder:text-base-400 focus:outline-none focus:ring-2 focus:ring-base-900" />
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <label for="password" class="text-sm font-medium text-base-800">Password</label>
+        <input type="password" id="password" name="password" required autocomplete="current-password"
+          placeholder="••••••••"
+          class="rounded-lg border border-base-300 px-3 py-2 text-sm text-base-900 placeholder:text-base-400 focus:outline-none focus:ring-2 focus:ring-base-900" />
+      </div>
+
+      <div id="login-error" class="hidden rounded-lg bg-red-50 border border-red-200 px-3 py-2 text-sm text-red-700" role="alert"></div>
+
+      <button type="submit" id="login-btn"
+        class="w-full py-2.5 bg-brand-orange text-white text-sm font-medium rounded-full hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed">
+        Log in
+      </button>
+    </form>
+
+    <p class="text-sm text-base-500 text-center mt-6">
+      Don't have an account?
+      <a href="/register" class="text-base-900 font-medium hover:underline">Create one</a>
+    </p>
+
+  </div>
+</BaseLayout>
+
+<script>
+  import { signIn } from '../lib/auth-client';
+
+  const form    = document.getElementById('login-form')    as HTMLFormElement;
+  const btn     = document.getElementById('login-btn')     as HTMLButtonElement;
+  const errorEl = document.getElementById('login-error')   as HTMLElement;
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    errorEl.classList.add('hidden');
+    btn.disabled = true;
+    btn.textContent = 'Logging in…';
+
+    const email    = (form.querySelector('#email')    as HTMLInputElement).value.trim();
+    const password = (form.querySelector('#password') as HTMLInputElement).value;
+
+    const { error } = await signIn.email({ email, password, callbackURL: '/' });
+
+    if (error) {
+      errorEl.textContent = error.message ?? 'Login failed. Please check your details.';
+      errorEl.classList.remove('hidden');
+      btn.disabled = false;
+      btn.textContent = 'Log in';
+    } else {
+      window.location.href = '/';
+    }
+  });
+</script>

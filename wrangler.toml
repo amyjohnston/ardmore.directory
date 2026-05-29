@@ -1,0 +1,27 @@
+name = "ardmore-directory"
+compatibility_date = "2024-09-23"
+
+# R2 bucket for submitted business images.
+# For local dev: run `npx wrangler r2 bucket create ardmore-directory-images` once,
+# then `npx wrangler pages dev` to test uploads locally.
+# For production: add the binding in Cloudflare Dashboard →
+#   Pages → ardmore.directory → Settings → Functions → R2 bucket bindings
+#   Variable name: IMAGES_BUCKET  →  Bucket: ardmore-directory-images
+[[r2_buckets]]
+binding = "IMAGES_BUCKET"
+bucket_name = "ardmore-directory-images"
+
+# Public URL for the R2 bucket.
+# In production, set R2_PUBLIC_URL in Cloudflare Dashboard →
+#   Pages → ardmore.directory → Settings → Environment variables
+# Format: https://pub-<hash>.r2.dev  (enable public access on the bucket first)
+[[d1_databases]]
+binding = "DB"
+database_name = "ardmore-directory"
+database_id = "PASTE_YOUR_DATABASE_ID_HERE"  # from: npx wrangler d1 create ardmore-directory
+
+[vars]
+R2_PUBLIC_URL = ""
+# BETTER_AUTH_SECRET is a secret — set it via:
+#   npx wrangler secret put BETTER_AUTH_SECRET
+# Use a long random string (e.g. openssl rand -base64 32)

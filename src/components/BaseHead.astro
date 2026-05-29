@@ -1,76 +1,69 @@
 ---
 import '../styles/global.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = "The Directory for Ardmore, Oklahoma | ardmore.directory",
+  description = "The free local business directory for Ardmore, Oklahoma. Find restaurants, shops, services, automotive, real estate, and more in your community.",
+} = Astro.props;
+
+const canonicalUrl = "https://ardmore.directory/";
+const ogImage = "https://ardmore.directory/og-image.jpg"; // TODO: create and upload a 1200×630 social share image
 ---
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<!-- Basic Meta Tags -->
-<title>Find a local business in Ardmore, OK | ardmore.directory</title>
-<meta
-  name="description"
-  content="A brief description of your website content."
-/>
-<meta name="keywords" content="keyword1, keyword2, keyword3" />
-<meta name="author" content="Your Name or Company Name" />
+<!-- Primary Meta Tags -->
+<title>{title}</title>
+<meta name="description" content={description} />
+<meta name="keywords" content="ardmore oklahoma, ardmore ok businesses, local business directory ardmore, carter county oklahoma, ardmore ok restaurants, ardmore ok shops, find a business ardmore" />
+<meta name="author" content="ardmore.directory" />
 
 <!-- Favicons -->
 <link rel="icon" href="/favicon.ico" sizes="any" />
 <link rel="icon" href="/icon.svg" type="image/svg+xml" />
 <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 <link rel="manifest" href="/manifest.webmanifest" />
-
-<!-- Favicon for IE -->
 <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
-
-<!-- Favicons for different sizes -->
 <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
 <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png" />
-
-<!-- Open Graph / Facebook -->
-<meta property="og:type" content="website" />
-<meta property="og:url" content="https://www.yourwebsite.com/" />
-<meta property="og:title" content="Your Website Title" />
-<meta
-  property="og:description"
-  content="A brief description of your website content."
-/>
-<meta
-  property="og:image"
-  content="https://www.yourwebsite.com/path/to/image.jpg"
-/>
-
-<!-- Twitter -->
-<meta property="twitter:card" content="summary_large_image" />
-<meta property="twitter:url" content="https://www.yourwebsite.com/" />
-<meta property="twitter:title" content="Your Website Title" />
-<meta
-  property="twitter:description"
-  content="A brief description of your website content."
-/>
-<meta
-  property="twitter:image"
-  content="https://www.yourwebsite.com/path/to/image.jpg"
-/>
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
 
 <!-- Canonical URL -->
-<link rel="canonical" href="https://www.yourwebsite.com/" />
+<link rel="canonical" href={canonicalUrl} />
 
-<!-- Additional SEO -->
+<!-- Open Graph -->
+<meta property="og:type" content="website" />
+<meta property="og:url" content={canonicalUrl} />
+<meta property="og:site_name" content="ardmore.directory" />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:image" content={ogImage} />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:locale" content="en_US" />
+
+<!-- Twitter / X -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:url" content={canonicalUrl} />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={ogImage} />
+
+<!-- Crawling -->
 <meta name="robots" content="index, follow" />
 <meta name="googlebot" content="index, follow" />
 
-<!-- Apple Touch Icon (already included in favicons, but keeping for backwards compatibility) -->
-<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-
-<!-- Theme Color for Mobile Browsers -->
+<!-- Theme / Browser Chrome -->
 <meta name="theme-color" content="#3E433E" />
-
-<!-- For IE -->
 <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 
-
-
+<!-- Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet" />

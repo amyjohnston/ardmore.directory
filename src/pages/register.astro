@@ -1,0 +1,104 @@
+---
+export const prerender = false;
+
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { createAuth } from '../lib/auth';
+
+// Redirect already-logged-in users
+const env = (Astro.locals as any).runtime?.env ?? {};
+if (env.DB) {
+  const auth = createAuth(env.DB, env.BETTER_AUTH_SECRET ?? 'dev-secret-change-in-production');
+  const session = await auth.api.getSession({ headers: Astro.request.headers });
+  if (session) return Astro.redirect('/');
+}
+---
+
+<BaseLayout
+  title="Create an account | ardmore.directory"
+  description="Create a free account to add and manage your business listing on ardmore.directory."
+>
+  <div class="max-w-sm mx-auto py-16 px-4">
+
+    <div class="mb-8 text-center">
+      <a href="/" class="text-sm text-base-500 hover:text-base-900 transition-colors">&larr; Back to directory</a>
+    </div>
+
+    <h1 class="text-2xl font-medium text-base-900 mb-1 text-center">Create an account</h1>
+    <p class="text-sm text-base-500 text-center mb-8">Add and manage your business listing for free</p>
+
+    <form id="register-form" novalidate class="flex flex-col gap-4">
+      <div class="flex flex-col gap-1.5">
+        <label for="name" class="text-sm font-medium text-base-800">Your name</label>
+        <input type="text" id="name" name="name" required autocomplete="name"
+          placeholder="e.g. Jane Smith"
+          class="rounded-lg border border-base-300 px-3 py-2 text-sm text-base-900 placeholder:text-base-400 focus:outline-none focus:ring-2 focus:ring-base-900" />
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <label for="email" class="text-sm font-medium text-base-800">Email address</label>
+        <input type="email" id="email" name="email" required autocomplete="email"
+          placeholder="you@example.com"
+          class="rounded-lg border border-base-300 px-3 py-2 text-sm text-base-900 placeholder:text-base-400 focus:outline-none focus:ring-2 focus:ring-base-900" />
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <label for="password" class="text-sm font-medium text-base-800">Password</label>
+        <input type="password" id="password" name="password" required autocomplete="new-password"
+          placeholder="••••••••" minlength="8"
+          class="rounded-lg border border-base-300 px-3 py-2 text-sm text-base-900 placeholder:text-base-400 focus:outline-none focus:ring-2 focus:ring-base-900" />
+        <p class="text-xs text-base-400">At least 8 characters</p>
+      </div>
+
+      <div id="register-error" class="hidden rounded-lg bg-red-50 border border-red-200 px-3 py-2 text-sm text-red-700" role="alert"></div>
+
+      <button type="submit" id="register-btn"
+        class="w-full py-2.5 bg-brand-orange text-white text-sm font-medium rounded-full hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed">
+        Create account
+      </button>
+    </form>
+
+    <p class="text-sm text-base-500 text-center mt-6">
+      Already have an account?
+      <a href="/login" class="text-base-900 font-medium hover:underline">Log in</a>
+    </p>
+
+  </div>
+</BaseLayout>
+
+<script>
+  import { signUp } from '../lib/auth-client';
+
+  const form    = document.getElementById('register-form')  as HTMLFormElement;
+  const btn     = document.getElementById('register-btn')   as HTMLButtonElement;
+  const errorEl = document.getElementById('register-error') as HTMLElement;
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    errorEl.classList.add('hidden');
+    btn.disabled = true;
+    btn.textContent = 'Creating account…';
+
+    const name     = (form.querySelector('#name')     as HTMLInputElement).value.trim();
+    const email    = (form.querySelector('#email')    as HTMLInputElement).value.trim();
+    const password = (form.querySelector('#password') as HTMLInputElement).value;
+
+    if (password.length < 8) {
+      errorEl.textContent = 'Password must be at least 8 characters.';
+      errorEl.classList.remove('hidden');
+      btn.disabled = false;
+      btn.textContent = 'Create account';
+      return;
+    }
+
+    const { error } = await signUp.email({ name, email, password, callbackURL: '/' });
+
+    if (error) {
+      errorEl.textContent = error.message ?? 'Registration failed. Please try again.';
+      errorEl.classList.remove('hidden');
+      btn.disabled = false;
+      btn.textContent = 'Create account';
+    } else {
+      window.location.href = '/';
+    }
+  });
+</script>

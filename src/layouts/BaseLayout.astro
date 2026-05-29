@@ -1,6 +1,16 @@
 ---
 import BaseHead from "@/components/BaseHead.astro";
 import Footer from "@/components/global/Footer.astro";
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = "The Directory for Ardmore, Oklahoma | ardmore.directory",
+  description = "The free local business directory for Ardmore, Oklahoma. Find restaurants, shops, services, automotive, real estate, and more in your community.",
+} = Astro.props;
 ---
 
 <html lang="en">
@@ -28,7 +38,8 @@ import Footer from "@/components/global/Footer.astro";
       gtag('js', new Date());
       gtag('config', 'G-86WJKMHM4G');
     </script>
-    <BaseHead />
+    <BaseHead title={title} description={description} />
+    <slot name="head" />
   </head>
   <body class="bg-white max-w-6xl mx-auto px-8 lg:px-12 flex flex-col">
     <a href="#biz-grid" class="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-base-900 focus:text-white focus:rounded-lg focus:text-sm focus:font-medium">

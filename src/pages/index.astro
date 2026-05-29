@@ -1,10 +1,41 @@
 ---
-import BaseLayout from "../layouts/BaseLayout.astro";
-import Hero from "../components/landing/Hero.astro";
-import Businesses from "../components/landing/Businesses.astro";
+export const prerender = false;
+
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/landing/Hero.astro';
+import Businesses from '../components/landing/Businesses.astro';
+import { drizzle } from 'drizzle-orm/d1';
+import { businesses as businessesTable } from '../db/schema';
+import type { Business } from '../db/schema';
+
+const env = (Astro.locals as any).runtime?.env ?? {};
+
+let businesses: Business[] = [];
+
+if (env.DB) {
+  const db = drizzle(env.DB);
+  businesses = await db.select().from(businessesTable).all();
+} else {
+  // Fallback to static data when running without D1 (e.g. plain `astro dev`)
+  const { businesses: staticData } = await import('../data/businesses.js');
+  businesses = staticData.map((b: any, i: number) => ({
+    id: `static_${i}`,
+    userId: null,
+    name: b.name,
+    category: b.category,
+    phone: b.phone ?? null,
+    email: b.email ?? null,
+    address: b.address ?? null,
+    website: b.website ?? null,
+    facebook: b.facebook ?? null,
+    imageUrl: null,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  }));
+}
 ---
 
 <BaseLayout>
   <Hero />
-  <Businesses />
+  <Businesses businesses={businesses} />
 </BaseLayout>

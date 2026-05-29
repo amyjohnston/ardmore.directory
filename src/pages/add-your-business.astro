@@ -1,0 +1,409 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { categories } from "../data/businesses.js";
+
+export const prerender = true;
+---
+
+<BaseLayout
+  title="Add your business | ardmore.directory"
+  description="Submit your Ardmore, Oklahoma business to be listed in the ardmore.directory local business directory."
+>
+  <div class="max-w-2xl mx-auto py-12">
+
+    <div class="mb-8">
+      <a href="/" class="text-sm text-base-500 hover:text-base-900 transition-colors">&larr; Back to directory</a>
+    </div>
+
+    <h1 class="text-3xl font-medium text-base-900 mb-2">Add your business</h1>
+    <p class="text-base-600 mb-8">
+      Fill in the form below and we'll review your submission and add it to the directory.
+      Fields marked <span class="text-red-500 font-medium">*</span> are required.
+    </p>
+
+    <form id="submission-form" novalidate class="flex flex-col gap-8">
+
+      <!-- ── Business information ─────────────────────────────── -->
+      <fieldset class="flex flex-col gap-5">
+        <legend class="text-xs font-semibold uppercase tracking-widest text-base-500 mb-1">Business information</legend>
+
+        <div class="flex flex-col gap-1.5">
+          <label for="name" class="text-sm font-medium text-base-800">
+            Business name <span class="text-red-500">*</span>
+          </label>
+          <input type="text" id="name" name="name" required autocomplete="organization"
+            placeholder="e.g. Ardmore Coffee House"
+            class="rounded-lg border border-base-300 px-3 py-2 text-sm text-base-900 placeholder:text-base-400 focus:outline-none focus:ring-2 focus:ring-base-900" />
+        </div>
+
+        <div class="flex flex-col gap-1.5">
+          <label for="category" class="text-sm font-medium text-base-800">
+            Category <span class="text-red-500">*</span>
+          </label>
+          <select id="category" name="category" required
+            class="rounded-lg border border-base-300 px-3 py-2 text-sm text-base-900 bg-white focus:outline-none focus:ring-2 focus:ring-base-900">
+            <option value="" disabled selected>Select a category…</option>
+            {categories.map((cat) => (
+              <option value={cat}>{cat}</option>
+            ))}
+          </select>
+        </div>
+
+        <div class="flex flex-col gap-1.5">
+          <label for="phone" class="text-sm font-medium text-base-800">Phone number</label>
+          <input type="tel" id="phone" name="phone" autocomplete="tel"
+            placeholder="e.g. (580) 555-0100"
+            class="rounded-lg border border-base-300 px-3 py-2 text-sm text-base-900 placeholder:text-base-400 focus:outline-none focus:ring-2 focus:ring-base-900" />
+        </div>
+
+        <div class="flex flex-col gap-1.5">
+          <label for="email" class="text-sm font-medium text-base-800">Business email address</label>
+          <input type="email" id="email" name="email" autocomplete="email"
+            placeholder="e.g. hello@yourbusiness.com"
+            class="rounded-lg border border-base-300 px-3 py-2 text-sm text-base-900 placeholder:text-base-400 focus:outline-none focus:ring-2 focus:ring-base-900" />
+        </div>
+
+        <div class="flex flex-col gap-1.5">
+          <label for="address" class="text-sm font-medium text-base-800">Street address</label>
+          <input type="text" id="address" name="address" autocomplete="street-address"
+            placeholder="e.g. 123 W Main St, Ardmore, OK 73401"
+            class="rounded-lg border border-base-300 px-3 py-2 text-sm text-base-900 placeholder:text-base-400 focus:outline-none focus:ring-2 focus:ring-base-900" />
+        </div>
+
+        <div class="flex flex-col gap-1.5">
+          <label for="website" class="text-sm font-medium text-base-800">Website</label>
+          <input type="url" id="website" name="website"
+            placeholder="e.g. https://yourbusiness.com"
+            class="rounded-lg border border-base-300 px-3 py-2 text-sm text-base-900 placeholder:text-base-400 focus:outline-none focus:ring-2 focus:ring-base-900" />
+        </div>
+
+        <div class="flex flex-col gap-1.5">
+          <label for="facebook" class="text-sm font-medium text-base-800">Facebook page URL</label>
+          <input type="url" id="facebook" name="facebook"
+            placeholder="e.g. https://facebook.com/yourbusiness"
+            class="rounded-lg border border-base-300 px-3 py-2 text-sm text-base-900 placeholder:text-base-400 focus:outline-none focus:ring-2 focus:ring-base-900" />
+        </div>
+
+        <!-- ── Image upload & crop ───────────────────────────── -->
+        <div class="flex flex-col gap-3">
+          <div class="flex flex-col gap-1">
+            <span class="text-sm font-medium text-base-800">Logo or photo</span>
+            <p class="text-xs text-base-500">JPG or PNG, max 5 MB. You'll be able to crop and zoom before submitting.</p>
+          </div>
+
+          <!-- Step 1: file picker -->
+          <div id="file-picker-area">
+            <label for="logo-input"
+              class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-base-300 text-sm font-medium text-base-700 hover:bg-base-50 transition-colors cursor-pointer">
+              <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
+              </svg>
+              Choose image
+            </label>
+            <input type="file" id="logo-input" accept="image/jpeg,image/png" class="sr-only" />
+          </div>
+
+          <!-- Step 2: crop interface (hidden until file chosen) -->
+          <div id="crop-area" class="hidden flex flex-col gap-3">
+            <div class="overflow-hidden rounded-xl border border-base-200 bg-base-50" style="max-height: 360px;">
+              <img id="crop-image" class="block max-w-full" alt="" />
+            </div>
+<div class="flex gap-2 flex-wrap">
+              <button type="button" id="use-image-btn"
+                class="px-4 py-2 bg-base-900 text-white text-sm font-medium rounded-lg hover:opacity-90 transition-opacity">
+                Use this crop
+              </button>
+              <button type="button" id="change-image-btn"
+                class="px-4 py-2 bg-base-100 text-base-700 text-sm font-medium rounded-lg hover:bg-base-200 transition-colors">
+                Choose a different image
+              </button>
+            </div>
+          </div>
+
+          <!-- Step 3: confirmed preview (hidden until crop confirmed) -->
+          <div id="image-preview" class="hidden flex items-center gap-3">
+            <img id="preview-img" alt="Your chosen image" class="w-32 aspect-video object-cover rounded-lg border border-base-200" />
+            <div class="flex flex-col gap-1.5">
+              <p class="text-xs text-base-500">Looking good! You can edit the crop or remove it.</p>
+              <div class="flex gap-2">
+                <button type="button" id="edit-crop-btn"
+                  class="px-3 py-1.5 text-xs font-medium text-base-700 bg-base-100 rounded-lg hover:bg-base-200 transition-colors">
+                  Edit crop
+                </button>
+                <button type="button" id="remove-image-btn"
+                  class="px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors">
+                  Remove
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <p id="image-error" class="hidden text-xs text-red-500" role="alert"></p>
+        </div>
+      </fieldset>
+
+      <!-- ── Your details ─────────────────────────────────────── -->
+      <fieldset class="flex flex-col gap-5">
+        <legend class="text-xs font-semibold uppercase tracking-widest text-base-500 mb-1">Your details</legend>
+        <p class="text-xs text-base-500 mt-1">So we can follow up with you about your submission — not shown publicly.</p>
+
+        <div class="flex flex-col gap-1.5">
+          <label for="submitter-name" class="text-sm font-medium text-base-800">
+            Your name <span class="text-red-500">*</span>
+          </label>
+          <input type="text" id="submitter-name" name="submitter_name" required autocomplete="name"
+            placeholder="e.g. Jane Smith"
+            class="rounded-lg border border-base-300 px-3 py-2 text-sm text-base-900 placeholder:text-base-400 focus:outline-none focus:ring-2 focus:ring-base-900" />
+        </div>
+
+        <div class="flex flex-col gap-1.5">
+          <label for="submitter-email" class="text-sm font-medium text-base-800">
+            Your email address <span class="text-red-500">*</span>
+          </label>
+          <input type="email" id="submitter-email" name="submitter_email" required autocomplete="email"
+            placeholder="e.g. jane@example.com"
+            class="rounded-lg border border-base-300 px-3 py-2 text-sm text-base-900 placeholder:text-base-400 focus:outline-none focus:ring-2 focus:ring-base-900" />
+        </div>
+      </fieldset>
+
+      <!-- ── Status & submit ──────────────────────────────────── -->
+      <div id="form-status" class="hidden rounded-xl px-4 py-3 text-sm" role="alert"></div>
+
+      <div>
+        <button type="submit" id="submit-btn"
+          class="px-6 py-2.5 bg-brand-orange text-white text-sm font-medium rounded-full hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed">
+          Submit your business
+        </button>
+      </div>
+
+    </form>
+  </div>
+</BaseLayout>
+
+<link slot="head" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css" />
+
+<script>
+  import Cropper from 'cropperjs';
+
+  // ── DOM refs ──────────────────────────────────────────────────
+  const logoInput      = document.getElementById('logo-input')      as HTMLInputElement;
+  const filePickerArea = document.getElementById('file-picker-area') as HTMLElement;
+  const cropArea       = document.getElementById('crop-area')        as HTMLElement;
+  const cropImage      = document.getElementById('crop-image')       as HTMLImageElement;
+const useImageBtn    = document.getElementById('use-image-btn')    as HTMLButtonElement;
+  const changeImageBtn = document.getElementById('change-image-btn') as HTMLButtonElement;
+  const imagePreview   = document.getElementById('image-preview')    as HTMLElement;
+  const previewImg     = document.getElementById('preview-img')      as HTMLImageElement;
+  const editCropBtn    = document.getElementById('edit-crop-btn')    as HTMLButtonElement;
+  const removeImageBtn = document.getElementById('remove-image-btn') as HTMLButtonElement;
+  const imageError     = document.getElementById('image-error')      as HTMLElement;
+  const form           = document.getElementById('submission-form')  as HTMLFormElement;
+  const submitBtn      = document.getElementById('submit-btn')       as HTMLButtonElement;
+  const formStatus     = document.getElementById('form-status')      as HTMLElement;
+
+  // ── State ─────────────────────────────────────────────────────
+  let cropper: Cropper | null = null;
+  let croppedBlob: Blob | null = null;
+
+  // ── Helpers ───────────────────────────────────────────────────
+  function showError(msg: string) {
+    imageError.textContent = msg;
+    imageError.classList.remove('hidden');
+  }
+  function clearError() {
+    imageError.textContent = '';
+    imageError.classList.add('hidden');
+  }
+  function show(el: HTMLElement) { el.classList.remove('hidden'); }
+  function hide(el: HTMLElement) { el.classList.add('hidden'); }
+
+  function destroyCropper() {
+    cropper?.destroy();
+    cropper = null;
+  }
+
+  function resetToFilePicker() {
+    destroyCropper();
+    croppedBlob = null;
+    logoInput.value = '';
+    hide(cropArea);
+    hide(imagePreview);
+    show(filePickerArea);
+    clearError();
+  }
+
+  // ── File selected ─────────────────────────────────────────────
+  logoInput.addEventListener('change', () => {
+    const file = logoInput.files?.[0];
+    if (!file) return;
+    clearError();
+
+    if (!['image/jpeg', 'image/png'].includes(file.type)) {
+      showError('Please choose a JPG or PNG image.');
+      logoInput.value = '';
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      showError('The image must be 5 MB or smaller.');
+      logoInput.value = '';
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      destroyCropper();
+      cropImage.src = e.target!.result as string;
+      hide(filePickerArea);
+      hide(imagePreview);
+      show(cropArea);
+
+      cropper = new Cropper(cropImage, {
+        aspectRatio: 16 / 9,
+        viewMode: 1,          // keep crop box within canvas
+        autoCropArea: 0.9,
+        movable: true,
+        zoomable: true,
+        scalable: false,
+        rotatable: false,
+        guides: false,
+        center: true,
+        highlight: false,
+        cropBoxMovable: true,
+        cropBoxResizable: true,
+        ready() {},
+      });
+    };
+    reader.readAsDataURL(file);
+  });
+
+  // ── "Use this crop" ───────────────────────────────────────────
+  useImageBtn.addEventListener('click', () => {
+    if (!cropper) return;
+    // Render at exactly the card display size
+    const canvas = cropper.getCroppedCanvas({ width: 1200, height: 675 });
+    canvas.toBlob((blob) => {
+      if (!blob) return;
+      croppedBlob = blob;
+      previewImg.src = canvas.toDataURL();
+      hide(cropArea);
+      destroyCropper();
+      show(imagePreview);
+      clearError();
+    }, 'image/jpeg', 0.9);
+  });
+
+  // ── "Choose a different image" ────────────────────────────────
+  changeImageBtn.addEventListener('click', resetToFilePicker);
+
+  // ── "Edit crop" ───────────────────────────────────────────────
+  editCropBtn.addEventListener('click', () => {
+    croppedBlob = null;
+    hide(imagePreview);
+    // Re-trigger with same file if still available
+    if (logoInput.files?.[0]) {
+      logoInput.dispatchEvent(new Event('change'));
+    } else {
+      resetToFilePicker();
+    }
+  });
+
+  // ── "Remove" ──────────────────────────────────────────────────
+  removeImageBtn.addEventListener('click', resetToFilePicker);
+
+  // ── Form submission ───────────────────────────────────────────
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    // Basic required-field check
+    const businessName   = (form.querySelector('#name')            as HTMLInputElement).value.trim();
+    const category       = (form.querySelector('#category')        as unknown as HTMLSelectElement).value;
+    const submitterName  = (form.querySelector('#submitter-name')  as HTMLInputElement).value.trim();
+    const submitterEmail = (form.querySelector('#submitter-email') as HTMLInputElement).value.trim();
+
+    if (!businessName || !category || !submitterName || !submitterEmail) {
+      showStatus('Please fill in all required fields.', 'error');
+      return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Submitting…';
+    hide(formStatus);
+
+    try {
+      // Step 1 — upload image (if one was cropped)
+      let imageUrl = '';
+      if (croppedBlob) {
+        const uploadData = new FormData();
+        uploadData.append('image', croppedBlob, 'logo.jpg');
+        const uploadRes = await fetch('/api/upload-image', { method: 'POST', body: uploadData });
+        const uploadJson = await uploadRes.json() as { url?: string; error?: string };
+        if (!uploadRes.ok) throw new Error(uploadJson.error ?? 'Image upload failed.');
+        imageUrl = uploadJson.url ?? '';
+      }
+
+      // Step 2 — send form data to Web3Forms
+      // Get your free access key at https://web3forms.com and paste it below.
+      const WEB3FORMS_KEY = 'YOUR_WEB3FORMS_ACCESS_KEY';
+
+      const fields: Record<string, string> = {
+        name:     (form.querySelector('#name')     as HTMLInputElement).value.trim(),
+        category: (form.querySelector('#category') as unknown as HTMLSelectElement).value,
+        phone:    (form.querySelector('#phone')    as HTMLInputElement).value.trim(),
+        email:    (form.querySelector('#email')    as HTMLInputElement).value.trim(),
+        address:  (form.querySelector('#address')  as HTMLInputElement).value.trim(),
+        website:  (form.querySelector('#website')  as HTMLInputElement).value.trim(),
+        facebook: (form.querySelector('#facebook') as HTMLInputElement).value.trim(),
+      };
+
+      const messageLines = [
+        `Business name: ${fields.name}`,
+        `Category: ${fields.category}`,
+        fields.phone    ? `Phone: ${fields.phone}`       : '',
+        fields.email    ? `Email: ${fields.email}`       : '',
+        fields.address  ? `Address: ${fields.address}`   : '',
+        fields.website  ? `Website: ${fields.website}`   : '',
+        fields.facebook ? `Facebook: ${fields.facebook}` : '',
+        imageUrl        ? `Image: ${imageUrl}`            : 'No image submitted.',
+      ].filter(Boolean).join('\n');
+
+      const submitRes = await fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          access_key: WEB3FORMS_KEY,
+          subject: `New business submission: ${fields.name}`,
+          from_name: 'ardmore.directory',
+          name: submitterName,
+          email: submitterEmail,
+          message: messageLines,
+        }),
+      });
+
+      const submitJson = await submitRes.json() as { success?: boolean; message?: string };
+      if (!submitRes.ok || !submitJson.success) {
+        throw new Error(submitJson.message ?? 'Submission failed.');
+      }
+
+      form.reset();
+      resetToFilePicker();
+      showStatus('Thank you! We\'ll review your submission and be in touch soon.', 'success');
+    } catch (err) {
+      showStatus(err instanceof Error ? err.message : 'Something went wrong. Please try again.', 'error');
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Submit your business';
+    }
+  });
+
+  function showStatus(msg: string, type: 'success' | 'error') {
+    formStatus.textContent = msg;
+    formStatus.className = [
+      'rounded-xl px-4 py-3 text-sm',
+      type === 'success'
+        ? 'bg-green-50 text-green-800 border border-green-200'
+        : 'bg-red-50 text-red-700 border border-red-200',
+    ].join(' ');
+    show(formStatus);
+    formStatus.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+</script>
